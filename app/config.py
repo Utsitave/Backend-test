@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     )
 
     # Database
-    database_url: str = "postgresql+asyncpg://iot_user:password@localhost:5432/iot_db"
+    database_url: str = "mysql+aiomysql://iot_user:password@localhost:3306/iot_db"
 
     # Auth secrets
     grafana_api_key: str = "change_me"
