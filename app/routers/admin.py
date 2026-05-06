@@ -28,9 +28,10 @@ async def register_device(data: DeviceCreate, db: AsyncSession = Depends(get_db)
     await db.flush()
     await db.refresh(device)
 
-    resp = DeviceCreatedResponse.model_validate(device)
-    resp.api_key = api_key
-    return resp
+    return DeviceCreatedResponse(
+        **DeviceResponse.model_validate(device).model_dump(),
+        api_key=api_key,
+    )
 
 
 @router.get(

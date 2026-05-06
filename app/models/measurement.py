@@ -22,7 +22,6 @@ class Measurement(Base):
     sensor_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     value: Mapped[float] = mapped_column(Float, nullable=False)
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
-    extra_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     device: Mapped["Device"] = relationship(back_populates="measurements")

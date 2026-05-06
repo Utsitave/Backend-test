@@ -12,12 +12,12 @@ class Settings(BaseSettings):
     )
 
     # Database
-    database_url: str = "mysql+aiomysql://iot_user:password@localhost:3306/iot_db"
+    database_url: str
 
     # Auth secrets
-    grafana_api_key: str = "change_me"
-    admin_api_key: str = "change_me"
-    api_key_hmac_secret: str = "change_me_min_32_chars_secret_here_xx"
+    grafana_api_key: str
+    admin_api_key: str
+    api_key_hmac_secret: str
 
     # Certificate Authority
     ca_cert_path: Path = Path("certs/ca.crt")

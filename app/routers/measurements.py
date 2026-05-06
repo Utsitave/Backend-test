@@ -26,7 +26,6 @@ async def post_measurement(
         sensor_type=data.sensor_type,
         value=data.value,
         unit=data.unit,
-        extra_data=data.extra_data,
     )
     db.add(m)
     await db.flush()
