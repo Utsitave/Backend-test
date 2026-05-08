@@ -1,16 +1,3 @@
-"""
-Raspberry Pi sensor client — sends measurements to the IoT secure backend.
-
-Setup:
-  1. Copy certs/ca.crt from the backend VM to this directory.
-  2. Register the device and get an API key (see README or admin endpoint).
-  3. Edit the configuration block below.
-  4. pip install requests
-  5. python3 rpi_client.py
-
-Uncomment the DHT22 block if you have that sensor wired up.
-"""
-
 import logging
 import time
 from datetime import datetime, timezone
@@ -23,7 +10,9 @@ import requests
 SERVER_URL   = "https://192.168.x.x:8443"  # backend VM IP and port
 API_KEY      = "your-device-api-key-here"  # returned when device was registered
 INTERVAL     = 30                          # seconds between readings
-VERIFY_TLS   = False                       # set to "server.crt" if you copy it from the backend
+# Path to server.crt copied from the backend VM (scp certs/server.crt pi@<rpi>:~/iot_client/)
+# Set to False only for temporary debugging — it disables all TLS verification.
+VERIFY_TLS: str | bool = "server.crt"
 # ──────────────────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
@@ -33,7 +22,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-if not VERIFY_TLS:
+if VERIFY_TLS is False:
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 _session = requests.Session()
@@ -65,34 +54,7 @@ def read_sensors() -> list[dict]:
     except Exception as exc:
         log.warning("CPU temp read failed: %s", exc)
 
-    # ── DHT22 temperature + humidity (uncomment if wired up) ──────────────────
-    # Requires: pip install adafruit-circuitpython-dht
-    #           sudo apt install libgpiod2
-    #
-    # import adafruit_dht, board
-    # _dht = adafruit_dht.DHT22(board.D4)  # change D4 to your GPIO pin
-    #
-    # try:
-    #     readings.append({
-    #         "sensor_type": "temperature",
-    #         "value": _dht.temperature,
-    #         "unit": "C",
-    #         "extra_data": {"sensor": "DHT22"},
-    #     })
-    #     readings.append({
-    #         "sensor_type": "humidity",
-    #         "value": _dht.humidity,
-    #         "unit": "%",
-    #         "extra_data": {"sensor": "DHT22"},
-    #     })
-    # except Exception as exc:
-    #     log.warning("DHT22 read failed: %s", exc)
-    # ──────────────────────────────────────────────────────────────────────────
-
     return readings
-
-
-# ── Sending ────────────────────────────────────────────────────────────────────
 
 def send_measurement(sensor_type: str, value: float, unit: str, extra_data: dict | None = None) -> bool:
     payload = {
@@ -149,6 +111,7 @@ def main() -> None:
             ]
             if all(results):
                 consecutive_failures = 0
+                readings.clear()
             else:
                 consecutive_failures += 1
 
