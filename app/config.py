@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     tls_key_path: Path | None = None
 
     # Server
-    host: str = "0.0.0.0"
+    host: str = "192.168.1.2"
     port: int = 8443
     log_level: str = "INFO"
 
