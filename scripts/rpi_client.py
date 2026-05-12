@@ -10,9 +10,10 @@ import requests
 SERVER_URL   = "https://192.168.x.x:8443"  # backend VM IP and port
 API_KEY      = "your-device-api-key-here"  # returned when device was registered
 INTERVAL     = 30                          # seconds between readings
-# Path to server.crt copied from the backend VM (scp certs/server.crt pi@<rpi>:~/iot_client/)
+# Path to ca.crt copied from the backend VM (scp certs/ca.crt pi@<rpi>:~/iot_client/)
+# Use the CA cert, NOT server.crt — avoids OpenSSL 3.x rejection of self-signed server certs.
 # Set to False only for temporary debugging — it disables all TLS verification.
-VERIFY_TLS: str | bool = "server.crt"
+VERIFY_TLS: str | bool = "ca.crt"
 # ──────────────────────────────────────────────────────────────────────────────
 
 logging.basicConfig(
@@ -73,7 +74,7 @@ def send_measurement(sensor_type: str, value: float, unit: str, extra_data: dict
         log.info("OK  %s = %.2f %s  (id=%s)", sensor_type, value, unit, ack.get("measurement_id", "?"))
         return True
     except requests.exceptions.SSLError as exc:
-        log.error("TLS error — is ca.crt the right file? %s", exc)
+        log.error("TLS error — verify file: %r — %s", VERIFY_TLS, exc)
     except requests.exceptions.ConnectionError as exc:
         log.error("Cannot reach server: %s", exc)
     except requests.exceptions.HTTPError as exc:
